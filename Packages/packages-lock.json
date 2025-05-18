@@ -86,18 +86,47 @@
         "com.unity.modules.uielements": "1.0.0"
       }
     },
-    "com.unity.netcode.gameobjects": {
-      "version": "https://github.com/Unity-Technologies/com.unity.netcode.gameobjects.git?path=com.unity.netcode.gameobjects",
+    "com.unity.multiplayer.tools": {
+      "version": "2.2.3",
       "depth": 0,
-      "source": "git",
+      "source": "registry",
       "dependencies": {
-        "com.unity.nuget.mono-cecil": "1.10.1",
-        "com.unity.transport": "1.4.0"
+        "com.unity.burst": "1.8.18",
+        "com.unity.collections": "2.5.1",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.profiling.core": "1.0.2",
+        "com.unity.nuget.mono-cecil": "1.11.4",
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "edf0256159e75a39dbc7177549900298868bb172"
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.netcode.gameobjects": {
+      "version": "2.3.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.transport": "2.4.0",
+        "com.unity.nuget.mono-cecil": "1.11.4"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.4",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.profiling.core": {
+      "version": "1.0.2",
       "depth": 1,
       "source": "registry",
       "dependencies": {},

@@ -24,6 +24,16 @@ public class Gun : MonoBehaviour
         {
             Debug.Log("Hit: " + hit.collider.name);
             // Damage logic here
+
+            // Grabs the target script from the target
+            Target target = hit.transform.GetComponentInParent<Target>();
+
+
+            // If target has the target script attached -> take damage
+            if (target != null)
+            {
+                target.TakeDamage(damage);
+            }
         }
     }
 }

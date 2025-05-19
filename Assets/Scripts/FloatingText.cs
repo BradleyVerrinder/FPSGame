@@ -9,6 +9,8 @@ public class FloatingText : MonoBehaviour
 
     public float moveUpSpeed = 1f;
     public float fadeOutSpeed = 1f;
+
+    public Camera shooterCamera; // reference to the shooter’s camera
     private TextMeshProUGUI text;
     private Canvas canvas;
 
@@ -17,7 +19,7 @@ public class FloatingText : MonoBehaviour
         text = GetComponentInChildren<TextMeshProUGUI>();
         if (text == null)
             Debug.LogError("TextMeshProUGUI not found in children of FloatingText prefab.");
-    
+
         canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
             Debug.LogError("Canvas not found in parent of FloatingText prefab.");
@@ -30,6 +32,14 @@ public class FloatingText : MonoBehaviour
         // (0,1,0) * 2 * 0.016 (time for 60fps) = new Vector3(0,0.032,0).
         // So we're adding 0.032 to the y position each frame
         transform.position += Vector3.up * moveUpSpeed * Time.deltaTime;
+
+        if (shooterCamera != null)
+        {
+            // Sets the text to face the player that shot the target
+            // The player cam is passed into the takedamage function
+            Vector3 direction = transform.position - shooterCamera.transform.position;
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
 
         Color c = text.color;
 

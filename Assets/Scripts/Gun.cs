@@ -9,6 +9,8 @@ public class Gun : MonoBehaviour
 
     private float nextTimeToFire = 0f;
 
+    
+
     void Update()
     {
         if (!cam || !Input.GetButton("Fire1") || Time.time < nextTimeToFire) return;
@@ -32,7 +34,7 @@ public class Gun : MonoBehaviour
             // If target has the target script attached -> take damage
             if (target != null)
             {
-                target.TakeDamage(damage);
+                target.TakeDamage(damage, cam);
             }
         }
     }

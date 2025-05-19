@@ -3,6 +3,7 @@ using UnityEngine;
 public class Target : MonoBehaviour
 {
     public float health = 50f;
+    public GameObject floatingTextPrefab;
 
     public void TakeDamage(float amount)
     {
@@ -12,6 +13,13 @@ public class Target : MonoBehaviour
         if (health <= 0f)
         {
             Die();
+        }
+
+        if (floatingTextPrefab != null)
+        {
+            Vector3 spawnPos = transform.position + Vector3.up * 2f;
+            GameObject instance = Instantiate(floatingTextPrefab, spawnPos, Quaternion.identity);
+            instance.GetComponent<FloatingText>().SetText(amount.ToString());
         }
     }
 

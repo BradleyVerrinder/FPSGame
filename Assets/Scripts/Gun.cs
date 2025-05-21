@@ -7,6 +7,7 @@ public class Gun : NetworkBehaviour
     public float range = 100f;
     public float fireRate = 5f;
     public Camera cam;
+    public GameObject floatingTextPrefab; // assign in inspector
 
     private float nextTimeToFire = 0f;
 
@@ -20,43 +21,50 @@ public class Gun : NetworkBehaviour
 
     void Shoot()
     {
-        // Only local detection, the actual logic happens on the server
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         if (Physics.Raycast(ray, out RaycastHit hit, range))
         {
             Vector3 hitPoint = hit.point;
-            ulong targetNetworkObjectId = 0;
 
+            // Show floating text locally for the shooter
+            if (floatingTextPrefab != null)
+            {
+                Vector3 spawnPos = hit.transform.position + Vector3.up * 2f;
+                GameObject instance = Instantiate(floatingTextPrefab, spawnPos, Quaternion.identity);
+                FloatingText ft = instance.GetComponent<FloatingText>();
+                ft.SetText(damage.ToString());
+                ft.shooterCamera = cam;
+            }
+
+            // Send damage to the server
             NetworkObject targetNetObj = hit.transform.GetComponentInParent<NetworkObject>();
             if (targetNetObj != null)
-                targetNetworkObjectId = targetNetObj.NetworkObjectId;
-
-            ShootServerRpc(hitPoint, targetNetworkObjectId);
+            {
+                Debug.Log("Called Shoot ServerRpc");
+                ShootServerRpc(hitPoint, targetNetObj.NetworkObjectId);
+            }
         }
     }
 
     [ServerRpc]
     void ShootServerRpc(Vector3 hitPoint, ulong targetId)
     {
-        // Optional: validate client fire rate, etc.
-
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetId, out NetworkObject targetObj))
         {
-            Target target = targetObj.GetComponent<Target>();
-            if (target != null)
+           //Target target = targetObj.GetComponent<Target>();
+           //if (target != null)
+           //{
+           //    target.TakeDamage(damage);
+           //    return;
+           //}
+
+            // Damaging the player
+            PlayerHealth playerHealth = targetObj.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
             {
-                target.TakeDamage(damage, cam);
+                playerHealth.TakeDamage(damage);
+                return;
             }
         }
-
-        // Call ClientRpc to show effects on all clients
-        ShootClientRpc(hitPoint);
-    }
-
-    [ClientRpc]
-    void ShootClientRpc(Vector3 hitPoint)
-    {
-        // TODO: Play hit effect / muzzle flash / audio / animation on all clients
-        Debug.Log("Playing hit effect at " + hitPoint);
     }
 }

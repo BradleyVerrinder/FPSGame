@@ -8,6 +8,8 @@ public class FirstPersonController : NetworkBehaviour
     public float mouseSensitivity = 2f;
     public float jumpHeight = 2f;
     public float gravity = -9.81f;
+
+    private Animator animator;
     public Transform playerBody; 
 
     public Transform cameraRoot; // Assign this in inspector
@@ -18,40 +20,53 @@ public class FirstPersonController : NetworkBehaviour
     private bool isGrounded;
     private Vector3 velocity;
 
+    private NetworkVariable<Quaternion> networkRotation = new NetworkVariable<Quaternion>(
+        Quaternion.identity,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
     public override void OnNetworkSpawn()
     {
         if (!IsOwner)
         {
             cameraRoot.gameObject.SetActive(false); // disable camera for other players
-            enabled = false;  // disable script for other players (no input for them)
-            return;
         }
-
-        Cursor.lockState = CursorLockMode.Locked;
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     void Awake()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
     {
-        if (!IsOwner)
-            return;
+        if (IsOwner)
+        {
+            // Update playerBody rotation from network variable for yaw
+            playerBody.rotation = networkRotation.Value;
 
-        Debug.Log($"Update running on owner for {gameObject.name}");
+            HandleLook();
 
-        HandleLook();
+            Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            bool jumpPressed = Input.GetButtonDown("Jump");
 
-        // Gather input every frame and send to server
-        Vector2 moveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        bool jumpPressed = Input.GetButtonDown("Jump");
+            // Move locally immediately for responsiveness (optional prediction)
+            HandleMovementLocal(moveInput, jumpPressed);
 
-        // Move locally immediately for responsiveness
-        HandleMovementLocal(moveInput, jumpPressed);
-
-        SendMovementInputServerRpc(moveInput, jumpPressed);
+            // Send inputs to server for authoritative processing
+            SendMovementInputServerRpc(moveInput, jumpPressed);
+        }
+        else
+        {
+            // Non-owners: smoothly lerp rotation to the authoritative rotation from server
+            playerBody.rotation = Quaternion.Slerp(playerBody.rotation, networkRotation.Value, Time.deltaTime * 10f);
+        }
     }
 
     void HandleLook()
@@ -59,24 +74,33 @@ public class FirstPersonController : NetworkBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        Debug.Log($"Mouse Input: X={mouseX}, Y={mouseY}");
+        // IMPORTANT: Do NOT rotate playerBody locally here to avoid desync!
+        // Instead, send input to server for authoritative rotation update:
+        if (!IsServer)
+        {
+            SendLookInputServerRpc(mouseX);
+        }
+        else
+        {
+            // If on server and owner, apply rotation directly (because server processes input)
+            playerBody.Rotate(Vector3.up * mouseX);
+            networkRotation.Value = playerBody.rotation; // Update networked rotation for clients
+        }
 
-        // Rotate player horizontally locally for immediate feedback
-        playerBody.Rotate(Vector3.up * mouseX);
-
-        SendLookInputServerRpc(mouseX);
-
-        // Rotate camera vertically locally
+        // Vertical camera tilt is local only
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
         cameraRoot.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
     }
-    
+
     [ServerRpc]
     void SendLookInputServerRpc(float mouseX)
     {
-        if (!IsServer) return;
+        // Server receives rotation input and applies rotation authoritatively
         playerBody.Rotate(Vector3.up * mouseX);
+
+        // Update network variable to sync rotation with clients
+        networkRotation.Value = playerBody.rotation;
     }
 
     void HandleMovementLocal(Vector2 input, bool jump)
@@ -94,6 +118,9 @@ public class FirstPersonController : NetworkBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        float speed = new Vector2(input.x, input.y).magnitude;
+        animator.SetFloat("Speed", speed);
     }
 
     [ServerRpc]
@@ -101,11 +128,10 @@ public class FirstPersonController : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Process movement on server
         isGrounded = controller.isGrounded;
 
         if (isGrounded && velocity.y < 0)
-            velocity.y = -2f; // keep grounded
+            velocity.y = -2f;
 
         Vector3 move = playerBody.right * moveInput.x + playerBody.forward * moveInput.y;
         controller.Move(move * moveSpeed * Time.deltaTime);

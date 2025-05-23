@@ -61,7 +61,8 @@ public class FirstPersonController : NetworkBehaviour
         if (IsOwner)
         {
             // Update camera rotation
-            playerBody.rotation = networkRotation.Value;
+            // No need to overwrite players rotation with outdated network value - causes jittery rotation on client
+            //playerBody.rotation = networkRotation.Value;
 
             HandleLook();
 
@@ -92,31 +93,36 @@ public class FirstPersonController : NetworkBehaviour
         }
     }
 
+    private Quaternion lastSentRotation;
+
     void HandleLook()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        if (!IsServer)
-        {
-            SendLookInputServerRpc(mouseX);
-        }
-        else
-        {
-            playerBody.Rotate(Vector3.up * mouseX);
-            networkRotation.Value = playerBody.rotation;
-        }
+        // Rotate locally immediately for smooth client response
+        playerBody.Rotate(Vector3.up * mouseX);
 
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
         cameraRoot.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
+
+        // Send the *final* rotation quaternion to server (not just mouseX)
+        if (IsOwner)
+        {
+            if (Quaternion.Angle(lastSentRotation, playerBody.rotation) > 0.1f)
+            {
+                SendRotationServerRpc(playerBody.rotation);
+                lastSentRotation = playerBody.rotation;
+            }
+        }
     }
 
+
     [ServerRpc]
-    void SendLookInputServerRpc(float mouseX)
+    void SendRotationServerRpc(Quaternion rotation)
     {
-        playerBody.Rotate(Vector3.up * mouseX);
-        networkRotation.Value = playerBody.rotation;
+        networkRotation.Value = rotation;
     }
 
     [ServerRpc]

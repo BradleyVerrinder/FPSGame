@@ -17,6 +17,9 @@ public class FirstPersonController : NetworkBehaviour
     public Transform playerBody;
     public Transform cameraRoot;
 
+    public GameObject firstPersonGun;
+    public GameObject thirdPersonGun;
+
     private CharacterController controller;
     private float verticalRotation = 0f;
     private bool isGrounded;
@@ -46,10 +49,14 @@ public class FirstPersonController : NetworkBehaviour
         if (!IsOwner)
         {
             cameraRoot.gameObject.SetActive(false);
+            firstPersonGun.SetActive(false);
+            thirdPersonGun.SetActive(true);
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
+            firstPersonGun.SetActive(true);
+            thirdPersonGun.SetActive(false); 
         }
     }
 

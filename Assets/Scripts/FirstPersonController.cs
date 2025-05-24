@@ -31,7 +31,10 @@ public class FirstPersonController : NetworkBehaviour
 
     private Vector2 cachedMoveInput;
     private bool cachedJump;
+    private bool jumpConsumed = true;
 
+    private bool jumpQueued = false;
+    
     public override void OnNetworkSpawn()
     {
         if (IsServer)
@@ -67,9 +70,15 @@ public class FirstPersonController : NetworkBehaviour
             HandleLook();
 
             cachedMoveInput = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            cachedJump = Input.GetButtonDown("Jump");
 
-            SendMovementInputServerRpc(cachedMoveInput, cachedJump);
+            
+            if (Input.GetButtonDown("Jump"))
+            {
+               jumpQueued = true;
+            }
+
+            SendMovementInputServerRpc(cachedMoveInput, jumpQueued);
+            jumpQueued = false;
 
             // Display locally for responsiveness
             Vector3 localMove = playerBody.InverseTransformDirection(
@@ -90,6 +99,7 @@ public class FirstPersonController : NetworkBehaviour
         if (IsServer)
         {
             ApplyMovement(cachedMoveInput, cachedJump);
+            cachedJump = false; // always clear after use
         }
     }
 
@@ -129,7 +139,10 @@ public class FirstPersonController : NetworkBehaviour
     void SendMovementInputServerRpc(Vector2 moveInput, bool jumpPressed)
     {
         cachedMoveInput = moveInput;
-        cachedJump = jumpPressed;
+        if (jumpPressed)
+        {
+            cachedJump = true;
+        }
     }
 
     void ApplyMovement(Vector2 moveInput, bool jumpPressed)
@@ -151,5 +164,6 @@ public class FirstPersonController : NetworkBehaviour
         Vector3 localMove = playerBody.InverseTransformDirection(move);
         netMoveX.Value = localMove.x;
         netMoveY.Value = localMove.z;
+
     }
 }

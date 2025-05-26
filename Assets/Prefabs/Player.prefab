@@ -2098,7 +2098,7 @@ MonoBehaviour:
   SyncPositionY: 1
   SyncPositionZ: 1
   SyncRotAngleX: 1
-  SyncRotAngleY: 1
+  SyncRotAngleY: 0
   SyncRotAngleZ: 1
   SyncScaleX: 1
   SyncScaleY: 1
@@ -2201,14 +2201,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed:
-    m_InternalValue: 2
-  gravity:
-    m_InternalValue: -9.81
+  moveSpeed: 5
+  jumpForce: 6
+  gravity: -9.81
   mouseSensitivity: 2
-  jumpHeight: 2
-  playerBody: {fileID: 7356980967485029350}
+  cameraPitchLimit: 85
   cameraRoot: {fileID: 6309478991037841576}
+  playerBody: {fileID: 7356980967485029350}
   firstPersonGun: {fileID: 5637090541073635504}
   thirdPersonGun: {fileID: 1163877690201265613}
 --- !u!114 &6896932378993653109

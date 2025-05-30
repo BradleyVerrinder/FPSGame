@@ -77,11 +77,6 @@ public class FirstPersonController : NetworkBehaviour
             if (!IsServer)
             {
                 ClientPredictMovement();
-
-                // 🔍 Debugging position drift
-                float dist = Vector3.Distance(transform.position, serverPosition.Value);
-                if (dist > 0.1f)
-                    Debug.Log($"[Drift] Local vs Server Position Drift: {dist:F3}");
             }
             // Update local animations
             Vector3 localMove = playerBody.InverseTransformDirection(

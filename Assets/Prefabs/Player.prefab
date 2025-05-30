@@ -843,7 +843,7 @@ GameObject:
   - component: {fileID: 4145372900644840934}
   - component: {fileID: 6515546459134545733}
   m_Layer: 0
-  m_Name: Gun
+  m_Name: Ak-47
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -857,12 +857,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3406887124145384298}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.013, y: 0.27000013, z: -0.07099999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6309478991037841576}
+  m_Father: {fileID: 8455139334832211015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6515546459134545733
 MonoBehaviour:
@@ -876,12 +876,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d4eb332f2593124cbd82407e493105d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
+  weaponName: Rifle
   damage: 25
-  range: 100
   fireRate: 5
-  cam: {fileID: 5205117829833084122}
-  floatingTextPrefab: {fileID: 6844799958420109146, guid: ede2dc6e25563724ca42b267e0156dda, type: 3}
+  magazineSize: 30
+  range: 100
+  muzzleFlash: {fileID: 0}
+  shotSound: {fileID: 0}
 --- !u!1 &3855785734082473656
 GameObject:
   m_ObjectHideFlags: 0
@@ -1529,7 +1530,8 @@ Transform:
   m_LocalPosition: {x: -0.013, y: -0.27, z: 0.071}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4145372900644840934}
   m_Father: {fileID: 6309478991037841576}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5763230808962682414
@@ -1761,7 +1763,6 @@ Transform:
   m_Children:
   - {fileID: 5003823918182089226}
   - {fileID: 7933539678204041638}
-  - {fileID: 4145372900644840934}
   - {fileID: 8455139334832211015}
   m_Father: {fileID: 7356980967485029350}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1974,6 +1975,8 @@ GameObject:
   - component: {fileID: -4323415793954128901}
   - component: {fileID: -8042752174147562197}
   - component: {fileID: 6896932378993653109}
+  - component: {fileID: 3819839114447200015}
+  - component: {fileID: 3278718172102712918}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2227,6 +2230,37 @@ MonoBehaviour:
   currentHealth:
     m_InternalValue: 0
   RespawnDelay: 5
+--- !u!114 &3819839114447200015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7431144262351760759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b82b2539d70d4b5488376706a3eb8dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  weaponInventory:
+  - {fileID: 6515546459134545733}
+  playerCamera: {fileID: 5205117829833084122}
+  floatingTextPrefab: {fileID: 6844799958420109146, guid: ede2dc6e25563724ca42b267e0156dda, type: 3}
+--- !u!114 &3278718172102712918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7431144262351760759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a90b9d54b46abc64c84fda157b4da446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  hudPrefab: {fileID: 4217194886133539859, guid: 171d0ad5f684c8943af381d7e3ef23f1, type: 3}
 --- !u!1 &7760599850225370452
 GameObject:
   m_ObjectHideFlags: 0
@@ -2731,7 +2765,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8b7f7c65a4b3437489e590b8efb5ec7b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2732093067581794179}
   m_SourcePrefab: {fileID: 100100000, guid: 8b7f7c65a4b3437489e590b8efb5ec7b, type: 3}
 --- !u!4 &5003823918182089226 stripped
 Transform:
@@ -2743,3 +2780,22 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 8b7f7c65a4b3437489e590b8efb5ec7b, type: 3}
   m_PrefabInstance: {fileID: 4826625332765631969}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2732093067581794179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5637090541073635504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d4eb332f2593124cbd82407e493105d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponName: Rifle
+  damage: 25
+  fireRate: 10
+  magazineSize: 30
+  range: 100
+  muzzleFlash: {fileID: 0}
+  shotSound: {fileID: 0}

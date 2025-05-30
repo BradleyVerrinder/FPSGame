@@ -2,6 +2,8 @@ using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 using Unity.Netcode.Components;
+using NUnit.Framework.Internal.Commands;
+using System;
 
 public class PlayerHealth : NetworkBehaviour
 {
@@ -12,11 +14,27 @@ public class PlayerHealth : NetworkBehaviour
 
     public float RespawnDelay = 5f;
 
+    public float CurrentHealthNormalised => currentHealth.Value / maxHealth;
+
+    public event Action<float> onHealthChanged;
+
     private FirstPersonController firstPersonController;
     private Renderer[] renderers;
 
     public override void OnNetworkSpawn()
-    {
+    { 
+
+        if (IsOwner)
+        {
+            Debug.Log("I am the local player: " + gameObject.name);
+            var wm = GetComponent<WeaponManager>();
+            if (wm != null)
+                Debug.Log("WeaponManager IS attached to this player");
+            else
+                Debug.LogError("WeaponManager MISSING on player prefab!");
+        }
+
+        
         base.OnNetworkSpawn();
         if (IsServer)
         {
@@ -27,16 +45,36 @@ public class PlayerHealth : NetworkBehaviour
         renderers = GetComponentsInChildren<Renderer>();
     }
 
+    //Event which the UI will subscribe to so that it can update the health slider
+    private void OnEnable()
+    {
+        currentHealth.OnValueChanged += OnHealthChangedCallback; //Calls that function when OnValueChanged is triggered
+    }
+ 
+    private void OnDisable()
+    {
+        currentHealth.OnValueChanged -= OnHealthChangedCallback; //Stops calling function when value is changed upon game object being disabled
+    }
+
+    private void OnHealthChangedCallback(float oldVal, float newVal) // Variables automatically given by netcode for game objects function "OnValueChanged"
+    {
+        float normalised = newVal / maxHealth;
+        onHealthChanged?.Invoke(normalised); // C# event (avoids polling)
+    }
+
     public void TakeDamage(float amount)
     {
         if (!IsServer) return;
 
-        currentHealth.Value -= amount;
+        float newHealth = Mathf.Clamp(currentHealth.Value - amount, 0, maxHealth);
+        currentHealth.Value = newHealth;
         if (currentHealth.Value <= 0f)
         {
             Die();
         }
     }
+
+    public float CurrentHealthNormalized => currentHealth.Value / maxHealth;
 
     void Die()
     {
@@ -111,7 +149,7 @@ public class PlayerHealth : NetworkBehaviour
     Vector3 GetRandomSpawnPoint()
     {
         // Replace with your actual spawn point logic
-        return new Vector3(Random.Range(-10, 10), 1, Random.Range(-10, 10));
+        return new Vector3(UnityEngine.Random.Range(-10, 10), 1, UnityEngine.Random.Range(-10, 10));
     }
 
     public float GetHealth() => currentHealth.Value;

@@ -11,13 +11,18 @@ public class HUDController : MonoBehaviour
     private PlayerHealth playerHealth;
     private WeaponManager weaponManager;
 
+    public GameObject deathScreen;
+    public TextMeshProUGUI countdownText;
+
     public void Initialize(GameObject player)
     {
 
         playerHealth = player.GetComponent<PlayerHealth>();
         if (playerHealth != null)
         {
+            playerHealth.onDeathStateChanged += HandleDeathScreen;
             playerHealth.onHealthChanged += UpdateHealthUI;
+            HandleDeathScreen(playerHealth.isDead.Value);
             UpdateHealthUI(playerHealth.CurrentHealthNormalized);
         }
         else
@@ -34,6 +39,22 @@ public class HUDController : MonoBehaviour
         else
         {
             Debug.LogError("HUDController: WeaponManager not found!");
+        }
+
+    }
+
+    void HandleDeathScreen(bool isDead)
+    {
+        if (deathScreen == null) return;
+
+        deathScreen.SetActive(isDead);
+
+        if (isDead)
+        {
+            countdown = playerHealth.RespawnDelay;
+
+            if (countdownText == null)
+                countdownText = deathScreen.GetComponentInChildren<TextMeshProUGUI>();
         }
     }
 
@@ -56,8 +77,22 @@ public class HUDController : MonoBehaviour
     {
         if (playerHealth != null)
             playerHealth.onHealthChanged -= UpdateHealthUI;
+        playerHealth.onDeathStateChanged -= HandleDeathScreen;
 
         if (weaponManager != null)
             weaponManager.OnAmmoChanged -= UpdateAmmoUI;
+    }
+    
+
+    private float countdown;
+
+    void Update()
+    {
+        if (deathScreen.activeSelf && countdown > 0f)
+        {
+            countdown -= Time.deltaTime;
+            if (countdownText != null)
+                countdownText.text = "Respawning in " + Mathf.CeilToInt(countdown) + "...";
+        }
     }
 }

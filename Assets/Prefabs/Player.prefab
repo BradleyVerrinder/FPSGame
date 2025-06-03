@@ -2205,7 +2205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   moveSpeed: 5
-  jumpForce: 6
+  jumpForce: 2
   gravity: -9.81
   mouseSensitivity: 2
   cameraPitchLimit: 85
@@ -2229,7 +2229,11 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth:
     m_InternalValue: 0
+  isDead:
+    m_InternalValue: 0
   RespawnDelay: 5
+  countdownText: {fileID: 0}
+  deathScreen: {fileID: 5509285573322783487, guid: d8bc02d445754644aa62b2435e1c9905, type: 3}
 --- !u!114 &3819839114447200015
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2261,6 +2265,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   hudPrefab: {fileID: 4217194886133539859, guid: 171d0ad5f684c8943af381d7e3ef23f1, type: 3}
+  deathScreenPrefab: {fileID: 5509285573322783487, guid: d8bc02d445754644aa62b2435e1c9905, type: 3}
 --- !u!1 &7760599850225370452
 GameObject:
   m_ObjectHideFlags: 0

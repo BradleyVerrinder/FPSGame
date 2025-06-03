@@ -4,6 +4,7 @@ using System.Collections;
 using Unity.Netcode.Components;
 using NUnit.Framework.Internal.Commands;
 using System;
+using TMPro;
 
 public class PlayerHealth : NetworkBehaviour
 {
@@ -12,29 +13,39 @@ public class PlayerHealth : NetworkBehaviour
         writePerm: NetworkVariableWritePermission.Server
 );
 
+    public NetworkVariable<bool> isDead = new NetworkVariable<bool>(
+        false,
+        writePerm: NetworkVariableWritePermission.Server
+    );
+
+    public event Action<bool> onDeathStateChanged;
+
     public float RespawnDelay = 5f;
+
+    public TextMeshProUGUI countdownText;
 
     public float CurrentHealthNormalised => currentHealth.Value / maxHealth;
 
     public event Action<float> onHealthChanged;
 
+    public GameObject deathScreen;
+
     private FirstPersonController firstPersonController;
     private Renderer[] renderers;
 
     public override void OnNetworkSpawn()
-    { 
+    {
 
         if (IsOwner)
         {
-            Debug.Log("I am the local player: " + gameObject.name);
+            if (deathScreen != null)
+            {
+                deathScreen.SetActive(false);
+            }
             var wm = GetComponent<WeaponManager>();
-            if (wm != null)
-                Debug.Log("WeaponManager IS attached to this player");
-            else
-                Debug.LogError("WeaponManager MISSING on player prefab!");
         }
 
-        
+
         base.OnNetworkSpawn();
         if (IsServer)
         {
@@ -45,15 +56,25 @@ public class PlayerHealth : NetworkBehaviour
         renderers = GetComponentsInChildren<Renderer>();
     }
 
+
+    private void OnIsDeadChanged(bool oldVal, bool newVal)
+    {
+        if (!IsOwner) return;
+
+        onDeathStateChanged?.Invoke(newVal); // true = dead, false = alive
+    }
+
     //Event which the UI will subscribe to so that it can update the health slider
     private void OnEnable()
     {
         currentHealth.OnValueChanged += OnHealthChangedCallback; //Calls that function when OnValueChanged is triggered
+        isDead.OnValueChanged += OnIsDeadChanged;
     }
- 
+
     private void OnDisable()
     {
         currentHealth.OnValueChanged -= OnHealthChangedCallback; //Stops calling function when value is changed upon game object being disabled
+        isDead.OnValueChanged -= OnIsDeadChanged;
     }
 
     private void OnHealthChangedCallback(float oldVal, float newVal) // Variables automatically given by netcode for game objects function "OnValueChanged"
@@ -78,7 +99,6 @@ public class PlayerHealth : NetworkBehaviour
 
     void Die()
     {
-        Debug.Log($"{gameObject.name} died.");
 
         // Disable character on server immediately
         EnableCharacter(false);
@@ -88,13 +108,14 @@ public class PlayerHealth : NetworkBehaviour
 
         if (IsServer)
         {
+            // Tell the owner client to show their death screen
+            isDead.Value = true;
             StartCoroutine(RespawnAfterDelay());
         }
     }
 
     System.Collections.IEnumerator RespawnAfterDelay()
     {
-
         yield return new WaitForSeconds(RespawnDelay);
 
         currentHealth.Value = maxHealth;
@@ -109,6 +130,8 @@ public class PlayerHealth : NetworkBehaviour
         // Notify client to teleport and re-enable
         RespawnClientRpc(transform.position);
 
+        isDead.Value = false;
+
         // Re-enable visuals and colliders for everyone
         EnableCharacter(true);
     }
@@ -116,13 +139,11 @@ public class PlayerHealth : NetworkBehaviour
     [ClientRpc]
     void RespawnClientRpc(Vector3 newPosition)
     {
-        Debug.Log($"[CLIENT] {gameObject.name} RespawnClientRpc called. Owner? {IsOwner}");
     
         EnableCharacter(true);
     
         if (IsOwner && firstPersonController != null)
         {
-            Debug.Log($"[CLIENT] Enabling FirstPersonController for {gameObject.name}");
             firstPersonController.enabled = true;
         }
     }

@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: 8b7f7c65a4b3437489e590b8efb5ec7b
+AssetOrigin:
+  serializedVersion: 1
+  productId: 308387
+  packageName: Free Gun Packs
+  packageVersion: 0.0.1
+  assetPath: Assets/PolyOne/Free Gun/Model/Ak47.fbx
+  uploadId: 731363
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -16,8 +23,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -107,10 +112,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 308387
-  packageName: Free Gun Packs
-  packageVersion: 0.0.1
-  assetPath: Assets/PolyOne/Free Gun/Model/Ak47.fbx
-  uploadId: 731363

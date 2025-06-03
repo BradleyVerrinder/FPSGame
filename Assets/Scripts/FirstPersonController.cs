@@ -6,7 +6,7 @@ public class FirstPersonController : NetworkBehaviour
 {
     [Header("Settings")]
     public float moveSpeed = 5f;
-    public float jumpForce = 6f;
+    public float jumpForce = 2f;
     public float gravity = -9.81f;
     public float mouseSensitivity = 2f;
     public float cameraPitchLimit = 85f;

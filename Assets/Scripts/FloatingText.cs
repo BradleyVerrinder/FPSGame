@@ -55,7 +55,6 @@ public class FloatingText : MonoBehaviour
 
     public void SetText(string value)
     {
-        Debug.Log($"Setting floating text to: {value}");
         text.text = value;
     }
 }

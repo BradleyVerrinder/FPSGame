@@ -38,8 +38,9 @@ This project is a networked FPS game prototype where players can connect via Uni
 - **Unity Relay (via Unity Transport)**
 - **Netcode utilities** for prediction/interpolation
 
-## 📦 Setup Instructions
+## 🔮 Future Improvements
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/multiplayer-fps-unity.git
+- Mounting Surfaces
+- Throwables such as Grenades, Smokes etc
+- Users can choose between a selection of maps
+- Recoil Patterns based on the chosen Gun

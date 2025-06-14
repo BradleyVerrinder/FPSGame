@@ -7,7 +7,7 @@ A real-time multiplayer first-person shooter built using Unity and C#, featuring
 This project is a networked FPS game prototype where players can connect via Unity's Relay service and compete in the same virtual space. It was developed as a hands-on exploration of distributed systems in gaming, and includes core features essential to modern online shooters.
 
 ## 📺 Showcase
-Watch a quick demo of the game in action!
+Watch a quick demo of the game in action! (As of June 13th 2025)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 [![Watch the video](https://img.youtube.com/vi/x7F3myyKBxk/maxresdefault.jpg)](https://www.youtube.com/watch?v=x7F3myyKBxk)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

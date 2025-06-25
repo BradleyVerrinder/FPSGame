@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Gun : MonoBehaviour
@@ -8,6 +9,10 @@ public class Gun : MonoBehaviour
     public float fireRate = 10f;
     public int magazineSize = 30;
     public float range = 100f;
+
+    [Header("Recoil Settings")]
+    public Vector2 recoilKick = new Vector2(3f, 1f);
+    public float recoilRecoverySpeed = 8f;
 
     [Header("Visual/Effects")]
     public ParticleSystem muzzleFlash;

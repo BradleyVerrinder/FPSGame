@@ -21,6 +21,8 @@ public class WeaponManager : NetworkBehaviour
 
     private float nextTimeToFire = 0f;
 
+    private CameraRecoil camRecoil;
+
     private void Start()
     {
         Debug.Log("WeaponManager: Start");
@@ -31,6 +33,8 @@ public class WeaponManager : NetworkBehaviour
             Debug.Log("WeaponManager: Subscribed to ammo events");
             currentAmmo.OnValueChanged += AmmoChanged;
             reserveAmmo.OnValueChanged += AmmoChanged;
+
+            camRecoil = playerCamera.GetComponent<CameraRecoil>();
         }
     }
 
@@ -58,6 +62,11 @@ public class WeaponManager : NetworkBehaviour
         if (!IsOwner || playerCamera == null)
             return;
 
+        if (IsOwner && TryGetComponent<FirstPersonController>(out var controller))
+        {
+            controller.isFiring = Input.GetButton("Fire1");
+        }
+
         if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
         {
             if (currentAmmo.Value > 0)
@@ -79,16 +88,28 @@ public class WeaponManager : NetworkBehaviour
 
     private void TryShoot()
     {
-        Ray ray = CurrentGun.GetShotRay(playerCamera);
-        if (Physics.Raycast(ray, out RaycastHit hit, CurrentGun.range))
+        if (IsOwner && TryGetComponent<FirstPersonController>(out var controller))
         {
+            // 1. Generate recoil
+            Vector2 recoil = CurrentGun.recoilKick;
+            recoil.y *= UnityEngine.Random.Range(-1f, 1f); // Optional horizontal randomness
 
+            // 2. Apply recoil BEFORE calculating bullet direction
+            controller.AddRecoil(recoil);
 
-            var netObj = hit.transform.GetComponentInParent<NetworkObject>();
-            if (netObj != null)
+            // 3. Get updated shoot direction (after recoil)
+            Vector3 shootDirection = controller.GetShootDirection();
+
+            // 4. Create the ray from the updated camera view
+            Ray ray = new Ray(playerCamera.transform.position, shootDirection);
+
+            // 5. Optional: Visual fire effects
+            CurrentGun.PlayFireEffects();
+
+            // 6. Do hit detection
+            if (Physics.Raycast(ray, out RaycastHit hit, CurrentGun.range))
             {
-
-                // Show floating text locally for the shooter
+                // Floating text for feedback
                 if (floatingTextPrefab != null)
                 {
                     Vector3 spawnPos = hit.transform.position + Vector3.up * 2f;
@@ -98,20 +119,24 @@ public class WeaponManager : NetworkBehaviour
                     ft.shooterCamera = playerCamera;
                 }
 
-
-                ShootServerRpc(netObj.NetworkObjectId, CurrentGun.damage);
+                var netObj = hit.transform.GetComponentInParent<NetworkObject>();
+                if (netObj != null)
+                {
+                    ShootServerRpc(netObj.NetworkObjectId, CurrentGun.damage);
+                }
+                else
+                {
+                    ShootServerRpc(0, CurrentGun.damage);
+                }
             }
             else
             {
+                // Still deduct ammo if we miss
                 ShootServerRpc(0, CurrentGun.damage);
             }
         }
-        else
-        {
-            // Still deduct ammo even if we miss
-            ShootServerRpc(0, CurrentGun.damage);
-        }
     }
+
 
     [ServerRpc]
     private void ShootServerRpc(ulong targetId, float damage)

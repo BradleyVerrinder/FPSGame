@@ -17,11 +17,26 @@ public class FirstPersonController : NetworkBehaviour
     public GameObject firstPersonGun;
     public GameObject thirdPersonGun;
 
+    [Header("Recoil Settings")]
+    public float recoilSnappiness = 10f;
+    public float recoilReturnSpeed = 20f;
+
+    private Vector2 recoilOffset;    // Accumulated recoil applied to camera
+    private Vector2 currentRecoil;   // Smoothed recoil this frame
+
+    private Vector2 totalRecoil;      // Full accumulated recoil
+    private Vector2 appliedRecoil;    // Smoothed recoil applied to camera
+
+    public bool isFiring;
+
+    private bool isRecoiling;
+    private float lastRecoilTime;
+    public float recoilReturnDelay = 0.1f;
+
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
     private float cameraPitch;
-
     private Animator animator;
 
     // Input cache
@@ -128,14 +143,51 @@ public class FirstPersonController : NetworkBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        // Horizontal rotation (Yaw)
         playerBody.Rotate(Vector3.up * mouseX);
 
-        // Vertical rotation (Pitch)
         cameraPitch -= mouseY;
         cameraPitch = Mathf.Clamp(cameraPitch, -cameraPitchLimit, cameraPitchLimit);
-        cameraRoot.localEulerAngles = new Vector3(cameraPitch, 0f, 0f);
+
+        // Smoothly apply accumulated recoil
+        appliedRecoil = Vector2.Lerp(appliedRecoil, totalRecoil, Time.deltaTime * recoilSnappiness);
+
+        float totalPitch = cameraPitch + appliedRecoil.x;
+        float totalYaw = appliedRecoil.y;
+
+        totalPitch = Mathf.Clamp(totalPitch, -cameraPitchLimit, cameraPitchLimit);
+
+        cameraRoot.localEulerAngles = new Vector3(totalPitch, totalYaw, 0f);
+
+        // Handle recoil recovery ONLY when not firing
+        if (!isFiring && isRecoiling && Time.time > lastRecoilTime + recoilReturnDelay)
+        {
+            totalRecoil = Vector2.Lerp(totalRecoil, Vector2.zero, Time.deltaTime * recoilReturnSpeed);
+
+            if (totalRecoil.magnitude < 0.01f)
+            {
+                totalRecoil = Vector2.zero;
+                isRecoiling = false;
+            }
+        }
     }
+
+    public Vector3 GetShootDirection()
+    {
+        float totalPitch = cameraPitch + totalRecoil.x;
+        float totalYaw = playerBody.rotation.eulerAngles.y + totalRecoil.y;
+
+        Quaternion recoilRotation = Quaternion.Euler(totalPitch, totalYaw, 0f);
+        return recoilRotation * Vector3.forward;
+    }
+
+    public void AddRecoil(Vector2 recoilAmount)
+    {
+        totalRecoil.x -= recoilAmount.x;  // Positive kicks UP
+        totalRecoil.y += recoilAmount.y;  // Sideways sway
+        lastRecoilTime = Time.time;
+        isRecoiling = true;
+        isFiring = true;
+}
 
     private void ClientPredictMovement()
     {

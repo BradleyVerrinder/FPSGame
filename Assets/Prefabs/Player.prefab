@@ -881,6 +881,8 @@ MonoBehaviour:
   fireRate: 5
   magazineSize: 30
   range: 100
+  recoilKick: {x: 2, y: 1}
+  recoilRecoverySpeed: 8
   muzzleFlash: {fileID: 0}
   shotSound: {fileID: 0}
 --- !u!1 &3855785734082473656
@@ -1977,6 +1979,7 @@ GameObject:
   - component: {fileID: 6896932378993653109}
   - component: {fileID: 3819839114447200015}
   - component: {fileID: 3278718172102712918}
+  - component: {fileID: 129553294311072108}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2266,6 +2269,20 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   hudPrefab: {fileID: 4217194886133539859, guid: 171d0ad5f684c8943af381d7e3ef23f1, type: 3}
   deathScreenPrefab: {fileID: 5509285573322783487, guid: d8bc02d445754644aa62b2435e1c9905, type: 3}
+--- !u!114 &129553294311072108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7431144262351760759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d0d394f76758a643809fac8676f4882, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  returnSpeed: 3
+  returnDelay: 1
 --- !u!1 &7760599850225370452
 GameObject:
   m_ObjectHideFlags: 0
@@ -2802,5 +2819,7 @@ MonoBehaviour:
   fireRate: 10
   magazineSize: 30
   range: 100
+  recoilKick: {x: 2, y: 1}
+  recoilRecoverySpeed: 8
   muzzleFlash: {fileID: 0}
   shotSound: {fileID: 0}
